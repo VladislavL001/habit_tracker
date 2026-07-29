@@ -1,7 +1,7 @@
-from rest_framework.pagination import PageNumberPagination
+from rest_framework.pagination import LimitOffsetPagination
 
 
-class HabitPagination(PageNumberPagination):
+class HabitPagination(LimitOffsetPagination):
     """Пагинация для списка привычек."""
 
     page_size = 5
