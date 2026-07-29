@@ -57,6 +57,12 @@ class Habit(models.Model):
         verbose_name="Публичная",
     )
 
+    last_notification = models.DateField(
+        null=True,
+        blank=True,
+        verbose_name="Дата последнего уведомления",
+    )
+
     class Meta:
         verbose_name = "Привычка"
         verbose_name_plural = "Привычки"
