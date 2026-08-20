@@ -53,3 +53,7 @@ media/
 
 # Redis dump
 dump.rdb
+
+celerybeat-schedule
+celerybeat-schedule-shm
+celerybeat-schedule-wal
