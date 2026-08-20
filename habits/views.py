@@ -6,7 +6,7 @@ from habits.models import Habit
 from habits.pagination import HabitPagination
 from habits.permissions import IsOwner
 from habits.serializers import HabitSerializer
-from habits.pagination import HabitPagination
+
 
 class HabitViewSet(viewsets.ModelViewSet):
     serializer_class = HabitSerializer
