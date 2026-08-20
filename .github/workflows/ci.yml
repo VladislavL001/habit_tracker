@@ -9,6 +9,21 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: habit_tracker
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d habit_tracker"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -25,6 +40,17 @@ jobs:
         run: poetry install --no-root --no-interaction --no-ansi
 
       - name: Run tests
+        env:
+          DB_NAME: habit_tracker
+          DB_USER: postgres
+          DB_PASSWORD: postgres
+          DB_HOST: localhost
+          DB_PORT: "5432"
+          REDIS_HOST: localhost
+          REDIS_PORT: "6379"
+          SECRET_KEY: test-secret-key
+          DEBUG: "True"
+          TELEGRAM_BOT_TOKEN: test-token
         run: poetry run python manage.py test
 
       - name: Run flake8
