@@ -78,6 +78,14 @@ jobs:
         with:
           yc-sa-json-credentials: ${{ secrets.YANDEX_SA_KEY }}
 
+      - name: Check Cloud Registry
+        env:
+          IAM_TOKEN: ${{ steps.iam-token.outputs.token }}
+        run: |
+          curl -sS \
+            -H "Authorization: Bearer ${IAM_TOKEN}" \
+            "https://registry.api.cloud.yandex.net/cloud-registry/v1/registries"
+
       - name: Login to Yandex Cloud Registry
         run: |
           echo "${{ steps.iam-token.outputs.token }}" | \
