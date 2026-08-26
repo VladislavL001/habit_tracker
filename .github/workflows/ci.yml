@@ -86,6 +86,14 @@ jobs:
               --password-stdin \
               registry.yandexcloud.net
 
+      - name: Check Cloud Registry
+        env:
+          IAM_TOKEN: ${{ steps.iam-token.outputs.token }}
+        run: |
+          curl -sS -w "\nHTTP_STATUS=%{http_code}\n" \
+            -H "Authorization: Bearer ${IAM_TOKEN}" \
+            "https://registry.api.cloud.yandex.net/cloud-registry/v1/registries/cn1jll5vhohmitcgj18"
+
       - name: Push Docker image
         run: |
           docker push registry.yandexcloud.net/cn1jll5vhohmitcgj18/habit-tracker:${{ github.sha }}
