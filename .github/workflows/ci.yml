@@ -1,0 +1,107 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - feature/coursework
+
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: habit_tracker
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d habit_tracker"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Install Poetry
+        run: pip install poetry
+
+      - name: Install dependencies
+        run: poetry install --no-root --no-interaction --no-ansi
+
+      - name: Run tests
+        env:
+          DB_NAME: habit_tracker
+          DB_USER: postgres
+          DB_PASSWORD: postgres
+          DB_HOST: localhost
+          DB_PORT: "5432"
+          REDIS_HOST: localhost
+          REDIS_PORT: "6379"
+          SECRET_KEY: test-secret-key
+          DEBUG: "True"
+          TELEGRAM_BOT_TOKEN: test-token
+        run: poetry run python manage.py test
+
+      - name: Run flake8
+        run: poetry run flake8
+
+  docker-build:
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: |
+          docker build -t cr.yandex/cn1jll5vhohmitcgj18/habit-tracker:${{ github.sha }} .
+          docker tag cr.yandex/cn1jll5vhohmitcgj18/habit-tracker:${{ github.sha }} \
+            cr.yandex/cn1jll5vhohmitcgj18/habit-tracker:latest
+
+      - name: Get IAM token
+        id: iam-token
+        uses: yc-actions/yc-iam-token@v1
+        with:
+          yc-sa-json-credentials: ${{ secrets.YANDEX_SA_KEY }}
+
+      - name: Login to Yandex Container Registry
+        run: |
+          echo "${{ steps.iam-token.outputs.token }}" | \
+            docker login \
+              --username iam \
+              --password-stdin \
+              cr.yandex
+
+      - name: Push Docker image
+        run: |
+          docker push cr.yandex/cn1jll5vhohmitcgj18/habit-tracker:${{ github.sha }}
+          docker push cr.yandex/cn1jll5vhohmitcgj18/habit-tracker:latest
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: docker-build
+
+    steps:
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /opt/habit_tracker
+            git pull origin feature/coursework
