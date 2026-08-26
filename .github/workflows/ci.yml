@@ -66,9 +66,9 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t cr.yandex/cn1jll5vhohmitcgj18/habit-tracker:${{ github.sha }} .
-          docker tag cr.yandex/cn1jll5vhohmitcgj18/habit-tracker:${{ github.sha }} \
-            cr.yandex/cn1jll5vhohmitcgj18/habit-tracker:latest
+          docker build -t cr.yandex/cn1j1l5vhohmitcgj18/habit-tracker:${{ github.sha }} .
+          docker tag cr.yandex/cn1j1l5vhohmitcgj18/habit-tracker:${{ github.sha }} \
+            cr.yandex/cn1j1l5vhohmitcgj18/habit-tracker:latest
 
       - name: Get IAM token
         id: iam-token
@@ -86,8 +86,8 @@ jobs:
 
       - name: Push Docker image
         run: |
-          docker push cr.yandex/cn1jll5vhohmitcgj18/habit-tracker:${{ github.sha }}
-          docker push cr.yandex/cn1jll5vhohmitcgj18/habit-tracker:latest
+          docker push cr.yandex/cn1j1l5vhohmitcgj18/habit-tracker:${{ github.sha }}
+          docker push cr.yandex/cn1j1l5vhohmitcgj18/habit-tracker:latest
 
   deploy:
     runs-on: ubuntu-latest
