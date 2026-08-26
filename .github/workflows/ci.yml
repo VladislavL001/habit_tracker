@@ -75,32 +75,13 @@ jobs:
             registry.yandexcloud.net/cn1jll5vhohmitcgj18/habit-tracker:${{ github.sha }} \
             registry.yandexcloud.net/cn1jll5vhohmitcgj18/habit-tracker:latest
 
-      - name: Check service account from key
-        env:
-          SA_KEY: ${{ secrets.YANDEX_SA_KEY }}
-        run: |
-          echo "$SA_KEY" | jq -r '.service_account_id'
-
-      - name: Get IAM token
-        id: iam-token
-        uses: yc-actions/yc-iam-token@v1
-        with:
-          yc-sa-json-credentials: ${{ secrets.YANDEX_SA_KEY }}
-
-      - name: Check Cloud Registry
-        env:
-          IAM_TOKEN: ${{ steps.iam-token.outputs.token }}
-        run: |
-          curl -sS \
-            -w "\nHTTP_STATUS=%{http_code}\n" \
-            -H "Authorization: Bearer ${IAM_TOKEN}" \
-            "https://registry.api.cloud.yandex.net/cloud-registry/v1/registries/cn1jll5vhohmitcgj18"
-
       - name: Login to Yandex Cloud Registry
+        env:
+          YANDEX_API_KEY: ${{ secrets.YANDEX_API_KEY }}
         run: |
-          echo "${{ steps.iam-token.outputs.token }}" | \
+          echo "$YANDEX_API_KEY" | \
             docker login \
-              --username iam \
+              --username api_key \
               --password-stdin \
               registry.yandexcloud.net
 
