@@ -68,9 +68,18 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t registry.yandexcloud.net/cn1j1l5vhohmitcgj18/habit-tracker:${{ github.sha }} .
-          docker tag registry.yandexcloud.net/cn1j1l5vhohmitcgj18/habit-tracker:${{ github.sha }} \
+          docker build \
+            -t registry.yandexcloud.net/cn1j1l5vhohmitcgj18/habit-tracker:${{ github.sha }} .
+
+          docker tag \
+            registry.yandexcloud.net/cn1j1l5vhohmitcgj18/habit-tracker:${{ github.sha }} \
             registry.yandexcloud.net/cn1j1l5vhohmitcgj18/habit-tracker:latest
+
+      - name: Check service account from key
+        env:
+          SA_KEY: ${{ secrets.YANDEX_SA_KEY }}
+        run: |
+          echo "$SA_KEY" | jq -r '.service_account_id'
 
       - name: Get IAM token
         id: iam-token
@@ -82,7 +91,8 @@ jobs:
         env:
           IAM_TOKEN: ${{ steps.iam-token.outputs.token }}
         run: |
-          curl -sS -w "\nHTTP_STATUS=%{http_code}\n" \
+          curl -sS \
+            -w "\nHTTP_STATUS=%{http_code}\n" \
             -H "Authorization: Bearer ${IAM_TOKEN}" \
             "https://registry.api.cloud.yandex.net/cloud-registry/v1/registries/cn1j1l5vhohmitcgj18"
 
@@ -96,8 +106,11 @@ jobs:
 
       - name: Push Docker image
         run: |
-          docker push registry.yandexcloud.net/cn1j1l5vhohmitcgj18/habit-tracker:${{ github.sha }}
-          docker push registry.yandexcloud.net/cn1j1l5vhohmitcgj18/habit-tracker:latest
+          docker push \
+            registry.yandexcloud.net/cn1j1l5vhohmitcgj18/habit-tracker:${{ github.sha }}
+
+          docker push \
+            registry.yandexcloud.net/cn1j1l5vhohmitcgj18/habit-tracker:latest
 
   deploy:
     runs-on: ubuntu-latest
