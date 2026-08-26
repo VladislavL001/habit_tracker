@@ -82,9 +82,9 @@ jobs:
         env:
           IAM_TOKEN: ${{ steps.iam-token.outputs.token }}
         run: |
-          curl -sS \
+          curl -sS -w "\nHTTP_STATUS=%{http_code}\n" \
             -H "Authorization: Bearer ${IAM_TOKEN}" \
-            "https://registry.api.cloud.yandex.net/cloud-registry/v1/registries"
+            "https://registry.api.cloud.yandex.net/cloud-registry/v1/registries/cn1jll5vhohmitcgj18"
 
       - name: Login to Yandex Cloud Registry
         run: |
