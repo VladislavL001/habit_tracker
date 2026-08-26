@@ -5,6 +5,8 @@ on:
     branches:
       - feature/coursework
 
+  workflow_dispatch:
+
 jobs:
   test:
     runs-on: ubuntu-latest
