@@ -28,7 +28,6 @@ db.sqlite3
 
 # Coverage
 .coverage
-htmlcov/
 .coverage.*
 coverage.xml
 
@@ -53,3 +52,7 @@ media/
 
 # Redis dump
 dump.rdb
+
+celerybeat-schedule
+celerybeat-schedule-shm
+celerybeat-schedule-wal

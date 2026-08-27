@@ -68,36 +68,30 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t registry.yandexcloud.net/cn1j1l5vhohmitcgj18/habit-tracker:${{ github.sha }} .
-          docker tag registry.yandexcloud.net/cn1j1l5vhohmitcgj18/habit-tracker:${{ github.sha }} \
-            registry.yandexcloud.net/cn1j1l5vhohmitcgj18/habit-tracker:latest
+          docker build \
+            -t registry.yandexcloud.net/cn1jll5vhohtmitcgj18/habit-tracker:${{ github.sha }} .
 
-      - name: Get IAM token
-        id: iam-token
-        uses: yc-actions/yc-iam-token@v1
-        with:
-          yc-sa-json-credentials: ${{ secrets.YANDEX_SA_KEY }}
-
-      - name: Check Cloud Registry
-        env:
-          IAM_TOKEN: ${{ steps.iam-token.outputs.token }}
-        run: |
-          curl -sS -w "\nHTTP_STATUS=%{http_code}\n" \
-            -H "Authorization: Bearer ${IAM_TOKEN}" \
-            "https://registry.api.cloud.yandex.net/cloud-registry/v1/registries/cn1j1l5vhohmitcgj18"
+          docker tag \
+            registry.yandexcloud.net/cn1jll5vhohtmitcgj18/habit-tracker:${{ github.sha }} \
+            registry.yandexcloud.net/cn1jll5vhohtmitcgj18/habit-tracker:latest
 
       - name: Login to Yandex Cloud Registry
+        env:
+          YANDEX_API_KEY: ${{ secrets.YANDEX_API_KEY }}
         run: |
-          echo "${{ steps.iam-token.outputs.token }}" | \
+          echo "$YANDEX_API_KEY" | \
             docker login \
-              --username iam \
+              --username api_key \
               --password-stdin \
               registry.yandexcloud.net
 
       - name: Push Docker image
         run: |
-          docker push registry.yandexcloud.net/cn1j1l5vhohmitcgj18/habit-tracker:${{ github.sha }}
-          docker push registry.yandexcloud.net/cn1j1l5vhohmitcgj18/habit-tracker:latest
+          docker push \
+            registry.yandexcloud.net/cn1jll5vhohtmitcgj18/habit-tracker:${{ github.sha }}
+
+          docker push \
+            registry.yandexcloud.net/cn1jll5vhohtmitcgj18/habit-tracker:latest
 
   deploy:
     runs-on: ubuntu-latest
@@ -113,3 +107,4 @@ jobs:
           script: |
             cd /opt/habit_tracker
             git pull origin feature/coursework
+            docker compose up -d --build
