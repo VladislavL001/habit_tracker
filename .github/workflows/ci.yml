@@ -69,11 +69,11 @@ jobs:
       - name: Build Docker image
         run: |
           docker build \
-            -t registry.yandexcloud.net/cn1jll5vhohmitcgj18/habit-tracker:${{ github.sha }} .
+            -t registry.yandexcloud.net/cn1jll5vhohtmitcgj18/habit-tracker:${{ github.sha }} .
 
           docker tag \
-            registry.yandexcloud.net/cn1jll5vhohmitcgj18/habit-tracker:${{ github.sha }} \
-            registry.yandexcloud.net/cn1jll5vhohmitcgj18/habit-tracker:latest
+            registry.yandexcloud.net/cn1jll5vhohtmitcgj18/habit-tracker:${{ github.sha }} \
+            registry.yandexcloud.net/cn1jll5vhohtmitcgj18/habit-tracker:latest
 
       - name: Login to Yandex Cloud Registry
         env:
@@ -85,13 +85,37 @@ jobs:
               --password-stdin \
               registry.yandexcloud.net
 
+      - name: Diagnose Yandex Cloud Registry
+        env:
+          YANDEX_API_KEY: ${{ secrets.YANDEX_API_KEY }}
+        run: |
+          echo "=== Docker Registry /v2/ ==="
+          curl -sS -i \
+            -u "api_key:${YANDEX_API_KEY}" \
+            "https://registry.yandexcloud.net/v2/" || true
+
+          echo "=== Docker Registry catalog ==="
+          curl -sS -i \
+            -u "api_key:${YANDEX_API_KEY}" \
+            "https://registry.yandexcloud.net/v2/_catalog" || true
+
+          echo "=== Registry API ==="
+          IAM_TOKEN=$(yc iam create-token 2>/dev/null || true)
+          if [ -n "$IAM_TOKEN" ]; then
+            curl -sS -i \
+              -H "Authorization: Bearer ${IAM_TOKEN}" \
+              "https://registry.api.cloud.yandex.net/cloud-registry/v1/registries/cn1jll5vhohtmitcgj18" || true
+          else
+            echo "Could not create IAM token with yc; skipping Registry API request"
+          fi
+
       - name: Push Docker image
         run: |
           docker push \
-            registry.yandexcloud.net/cn1jll5vhohmitcgj18/habit-tracker:${{ github.sha }}
+            registry.yandexcloud.net/cn1jll5vhohtmitcgj18/habit-tracker:${{ github.sha }}
 
           docker push \
-            registry.yandexcloud.net/cn1jll5vhohmitcgj18/habit-tracker:latest
+            registry.yandexcloud.net/cn1jll5vhohtmitcgj18/habit-tracker:latest
 
   deploy:
     runs-on: ubuntu-latest
