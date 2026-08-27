@@ -98,15 +98,6 @@ jobs:
     needs: docker-build
 
     steps:
-      - name: Check SSH connectivity
-        env:
-          SERVER_HOST: ${{ secrets.SERVER_HOST }}
-        run: |
-          echo "Testing SSH port on $SERVER_HOST"
-          nc -vz -w 10 "$SERVER_HOST" 22
-          echo "Testing HTTP port on $SERVER_HOST"
-          nc -vz -w 10 "$SERVER_HOST" 80
-
       - name: Deploy to server
         uses: appleboy/ssh-action@v1.2.2
         with:
